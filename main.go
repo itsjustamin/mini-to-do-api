@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Task struct {
@@ -19,15 +21,12 @@ var tasks []Task
 var nextID = 1
 
 func GetTasks(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
 }
 
 func PostTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
 
 	var task Task
 	json.NewDecoder(r.Body).Decode(&task)
@@ -39,19 +38,16 @@ func PostTask(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(task)
 }
 
-func UpdateTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
+func PutTask(w http.ResponseWriter, r *http.Request) {
 
-	idStr := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	idStr := vars["id"]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-		
+
 	for i, t := range tasks {
 		if t.ID == id {
 			var updated Task
@@ -70,12 +66,9 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
 
-	idStr := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	idStr := vars["id"]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -93,12 +86,9 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func PatchTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
 
-	idStr := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	idStr := vars["id"]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -120,24 +110,13 @@ func PatchTask(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			GetTasks(w, r)
-		case http.MethodPost:
-			PostTask(w, r)
-		case http.MethodPut:
-			UpdateTask(w, r)
-		case http.MethodDelete:
-			DeleteTask(w, r)
-		case http.MethodPatch:
-			PatchTask(w, r)
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
-	})
-	http.HandleFunc("/tasks/done", PatchTask)
+	router := mux.NewRouter()
+	router.HandleFunc("/tasks", GetTasks).Methods("GET")
+	router.HandleFunc("/tasks", PostTask).Methods("POST")
+	router.HandleFunc("/tasks/{id}", PutTask).Methods("PUT")
+	router.HandleFunc("/tasks/{id}", DeleteTask).Methods("DELETE")
+	router.HandleFunc("/tasks/done/{id}", PatchTask).Methods("PATCH")
 
 	println("Server started at :8080")
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":8080", router)
 }
