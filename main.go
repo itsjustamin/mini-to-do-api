@@ -42,11 +42,8 @@ func PutTask(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	idStr := vars["id"]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	id, _ := strconv.Atoi(idStr)
+
 
 	for i, t := range tasks {
 		if t.ID == id {
@@ -69,11 +66,8 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	idStr := vars["id"]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	id, _ := strconv.Atoi(idStr)
+
 
 	for i, t := range tasks {
 		if t.ID == id {
@@ -89,11 +83,8 @@ func PatchTask(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	idStr := vars["id"]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	id, _ := strconv.Atoi(idStr)
+
 
 	for i, t := range tasks {
 		if t.ID == id {
@@ -113,9 +104,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/tasks", GetTasks).Methods("GET")
 	router.HandleFunc("/tasks", PostTask).Methods("POST")
-	router.HandleFunc("/tasks/{id}", PutTask).Methods("PUT")
-	router.HandleFunc("/tasks/{id}", DeleteTask).Methods("DELETE")
-	router.HandleFunc("/tasks/done/{id}", PatchTask).Methods("PATCH")
+	router.HandleFunc("/tasks/{{id:[0-9]+}", PutTask).Methods("PUT")
+	router.HandleFunc("/tasks/{id:[0-9]+}", DeleteTask).Methods("DELETE")
+	router.HandleFunc("/tasks/done/{id:[0-9]+}", PatchTask).Methods("PATCH")
 
 	println("Server started at :8080")
 	http.ListenAndServe(":8080", router)
