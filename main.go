@@ -40,15 +40,13 @@ func PostTask(w http.ResponseWriter, r *http.Request) {
 
 func PutTask(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	idStr := vars["id"]
-	id, _ := strconv.Atoi(idStr)
-
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	for i, t := range tasks {
 		if t.ID == id {
 			var updated Task
 			json.NewDecoder(r.Body).Decode(&updated)
+
 			tasks[i].Title = updated.Title
 			tasks[i].Done = updated.Done
 			tasks[i].StartTime = updated.StartTime
@@ -64,10 +62,7 @@ func PutTask(w http.ResponseWriter, r *http.Request) {
 
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	idStr := vars["id"]
-	id, _ := strconv.Atoi(idStr)
-
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	for i, t := range tasks {
 		if t.ID == id {
@@ -81,10 +76,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 func PatchTask(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	idStr := vars["id"]
-	id, _ := strconv.Atoi(idStr)
-
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	for i, t := range tasks {
 		if t.ID == id {
@@ -104,7 +96,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/tasks", GetTasks).Methods("GET")
 	router.HandleFunc("/tasks", PostTask).Methods("POST")
-	router.HandleFunc("/tasks/{{id:[0-9]+}", PutTask).Methods("PUT")
+	router.HandleFunc("/tasks/{id:[0-9]+}", PutTask).Methods("PUT")
 	router.HandleFunc("/tasks/{id:[0-9]+}", DeleteTask).Methods("DELETE")
 	router.HandleFunc("/tasks/done/{id:[0-9]+}", PatchTask).Methods("PATCH")
 
