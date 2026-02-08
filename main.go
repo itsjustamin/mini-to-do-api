@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 )
 
 type Task struct {
@@ -16,6 +17,8 @@ type Task struct {
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 }
+
+var db *sqlx.DB
 
 var tasks []Task
 var nextID = 1
