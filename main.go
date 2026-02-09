@@ -22,9 +22,6 @@ type Task struct {
 
 var db *sqlx.DB
 
-var tasks []Task
-var nextID = 1
-
 func GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
