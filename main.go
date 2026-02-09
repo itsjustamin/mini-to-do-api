@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Task struct {
@@ -96,6 +98,13 @@ func PatchTask(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	var err error
+	dsn := "host=localhost port=5432 user=postgres password=postgres dbname=tasksdb sslmode=disable"
+
+	db, err = sqlx.Connect("postgres", dsn)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	router := mux.NewRouter()
 	router.HandleFunc("/tasks", GetTasks).Methods("GET")
 	router.HandleFunc("/tasks", PostTask).Methods("POST")
