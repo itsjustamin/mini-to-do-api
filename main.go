@@ -69,10 +69,11 @@ func PutTask(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	json.NewDecoder(r.Body).Decode(&task)
 
-	_, err := db.Exec(`
+	err := db.Get(&task, `
 		UPDATE tasks
 		SET title=$1, done=$2, start_time=$3, end_time=$4
 		WHERE id=$5
+		RETURNING *
 	`,
 		task.Title,
 		task.Done,
@@ -85,7 +86,6 @@ func PutTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	task.ID = id
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
 
