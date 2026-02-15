@@ -17,12 +17,12 @@ func CreateTask(task *models.Task) error {
 	VALUES ($1,$2,$3,$4)
 	RETURNING id`
 
-	return db.DB.QueryRow(query,
+	return db.DB.Get(&task.ID, query,
 		task.Title,
 		task.Done,
 		task.StartTime,
 		task.EndTime,
-	).Scan(&task.ID)
+	)
 }
 
 func UpdateTask(id int, task *models.Task) error {
