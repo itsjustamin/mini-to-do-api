@@ -3,6 +3,8 @@ package db
 import (
 	"log"
 
+	"to-do-api/config"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -10,11 +12,14 @@ import (
 var DB *sqlx.DB
 
 func Init() {
-	dsn := "host=localhost port=5432 user=postgres password=postgres dbname=taskdb sslmode=disable"
+	cfg := config.LoadConfig()
+
+	dsn := cfg.DBUrl()
 
 	var err error
 	DB, err = sqlx.Connect("postgres", dsn)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("Database connected successfully")
 }
